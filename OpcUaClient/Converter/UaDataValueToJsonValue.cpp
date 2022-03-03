@@ -293,7 +293,10 @@ namespace Umati {
 					}
 
 					case UA_DATATYPEKIND_DATAVALUE: {
-						LOG(ERROR) << "Not implemented conversion to OpcUaType_DataValue. ";
+						UA_DataValue d(*(UA_DataValue*)variant.data);
+						*jsonValue = {};
+						(*jsonValue)["hasServerPicoseconds"] = static_cast<bool>(d.hasServerPicoseconds);
+						(*jsonValue)["serverPicoseconds"] = d.serverPicoseconds;
 						break;
 					}
 
@@ -307,109 +310,72 @@ namespace Umati {
 						break;
 					}
 
-					case UA_DATATYPEKIND_STRUCTURE: {
+					case UA_DATATYPEKIND_QUALIFIEDNAME: {
+						LOG(ERROR) << "Not implemented conversion to OpcUaType_QualifiedName. ";
+						break;
+					}
 
-						if(strcmp(variant.type->typeName, "EUInformation")== 0){
-								UA_EUInformation euInfo(*(UA_EUInformation*)variant.data);
-								(*jsonValue)["namespaceUri"] = std::string((char*)euInfo.namespaceUri.data,euInfo.namespaceUri.length);
-								(*jsonValue)["unitId"] = euInfo.unitId;
-								UA_DataValue dataVal;
-								UA_DataValue_init(&dataVal);
-								{
-									UA_Variant_setScalar(&dataVal.value, &euInfo.displayName, &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
-									(*jsonValue)["displayName"] = UaDataValueToJsonValue(
-										dataVal,
-										serializeStatusInformation)
-										.getValue();
-								}
-								{
-									UA_Variant_setScalar(&dataVal.value, &euInfo.description, &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
-									(*jsonValue)["description"] = UaDataValueToJsonValue(
-										dataVal,
-										serializeStatusInformation)
-										.getValue();
-								}
-								break;
-							}else if (strcmp(variant.type->typeName, "Range")== 0){
-								UA_Range range(*(UA_Range*)variant.data);
-								(*jsonValue)["low"] = range.low;
-								(*jsonValue)["high"] = range.high;
-								break;
-						}else{
-							LOG(ERROR) << "Unknown data type. ";
-							break;
-						}
+					case UA_DATATYPEKIND_LOCALIZEDTEXT: {
+						UA_LocalizedText localText(*(UA_LocalizedText*)variant.data);
+						*jsonValue = {};
+						(*jsonValue)["locale"] = std::string((char*)localText.locale.data,localText.locale.length);
+						(*jsonValue)["text"] =  std::string((char*)localText.text.data,localText.text.length);
+						break;
 					}
 
 					default: {
-						if(strcmp(variant.type->typeName, UA_TYPES_TIGHTENING[UA_TYPES_TIGHTENING_PROCESSINGTIMESDATATYPE].typeName) == 0) {
-							UA_IJT_ProcessingTimesDataType ptime(*(UA_IJT_ProcessingTimesDataType*)variant.data);
+						void *data = variant.data;
+						for (size_t i = 0; i < variant.type->membersSize; i++) {
 							UA_DataValue dataVal;
 							UA_DataValue_init(&dataVal);
-							if(ptime.acquisitionDuration)(*jsonValue)["AcquisitionDuration"] = *ptime.acquisitionDuration;
-							if(ptime.processingDuration)(*jsonValue)["ProcessingDuration"] = *ptime.processingDuration;
 
-							UA_Variant_setScalar(&dataVal.value, &ptime.startTime, &UA_TYPES[UA_TYPES_DATETIME]);
-							(*jsonValue)["StartTime"] = UaDataValueToJsonValue(
-								dataVal,
-								serializeStatusInformation)
-								.getValue();
-							
-							UA_Variant_setScalar(&dataVal.value, &ptime.endTime, &UA_TYPES[UA_TYPES_DATETIME]);
-							(*jsonValue)["EndTime"] = UaDataValueToJsonValue(
-								dataVal,
-								serializeStatusInformation)
-								.getValue();
-						}
-						else if (strcmp(variant.type->typeName, UA_TYPES_MACHINERY_RESULT[UA_TYPES_MACHINERY_RESULT_RESULTDATATYPE].typeName) == 0) {
-							UA_ResultDataType result(*(UA_ResultDataType*)variant.data);
-							UA_DataValue dataVal;
-							UA_DataValue_init(&dataVal);
-							nlohmann::json resultMetaDataJson = {};
-							{
-								UA_Variant_setScalar(&dataVal.value, &result.resultMetaData.resultId, &UA_TYPES[UA_TYPES_STRING]);
-								resultMetaDataJson["ResultId"] = UaDataValueToJsonValue(
-									dataVal,
-									serializeStatusInformation)
-									.getValue();
+							{	
+								if (variant.type->members[i].isArray) {
+									size_t arraySize = *((size_t*) data);
+									void **pointerToArrayPointer = (void**)((UA_Byte*) data + sizeof(size_t));
+									void *pointerToArray = *(pointerToArrayPointer);
+									
+									if (arraySize > 0) {
+										UA_Variant_setArray(&dataVal.value,  (UA_Byte*) pointerToArray + variant.type->members[i].padding, arraySize,variant.type->members[i].memberType);
+										(*jsonValue)[std::string(variant.type->members[i].memberName)] = UaDataValueToJsonValue(
+											dataVal,
+											serializeStatusInformation)
+											.getValue();
+									}
+								} 
+								else {
+									void *dataPointer = (UA_Byte*) data + variant.type->members[i].padding;
+									UA_Variant_setScalar(&dataVal.value, dataPointer, variant.type->members[i].memberType);
+									auto json = UaDataValueToJsonValue(
+										dataVal,
+										serializeStatusInformation)
+										.getValue();
+									if(!json.is_null()) {
+										(*jsonValue)[std::string(variant.type->members[i].memberName)] = json;
+									}
+								}
+								if (variant.type->members[i].isArray) {
+									data = (UA_Byte*) data + sizeof(void*) + sizeof(size_t);
+								} else if (variant.type->members[i].isOptional) {
+									data = (UA_Byte*) data + sizeof(void*);
+								} else {
+									data = (UA_Byte*) data + variant.type->members[i].memberType->memSize;
+								}
+								data = (UA_Byte*) data + variant.type->members[i].padding;
 							}
-							if (result.resultMetaData.resultState) {
-								UA_Variant_setScalar(&dataVal.value, result.resultMetaData.resultState, &UA_TYPES[UA_TYPES_INT32]);
-								resultMetaDataJson["ResultState"] = UaDataValueToJsonValue(
-									dataVal,
-									serializeStatusInformation)
-									.getValue();
-							}
-							if (result.resultMetaData.resultUri) {
-								UA_Variant_setArray(&dataVal.value, result.resultMetaData.resultUri, result.resultMetaData.resultUriSize, &UA_TYPES[UA_TYPES_STRING]);
-								resultMetaDataJson["ResultUri"] = UaDataValueToJsonValue(
-									dataVal,
-									serializeStatusInformation)
-									.getValue();
-							}
-							if (result.resultMetaData.fileFormat) {
-								UA_Variant_setArray(&dataVal.value, result.resultMetaData.fileFormat, result.resultMetaData.fileFormatSize, &UA_TYPES[UA_TYPES_STRING]);
-								resultMetaDataJson["FileFormat"] = UaDataValueToJsonValue(
-									dataVal,
-									serializeStatusInformation)
-									.getValue();
-							}
-							(*jsonValue)["ResultMetaData"] = resultMetaDataJson;
-						} else {
-							LOG(ERROR) << "Unknown data type. ";
 						}
 						break;
 					}
 				}
 
 			}
-
+		
 
 			template<typename T>
 			void UaDataValueToJsonValue::getValueFromDataValueArray(const UA_Variant *variant, UA_UInt32 dimensionNumber,
 																	nlohmann::json *j, T *variantData, bool serializeStatusInformation) {
 				if (dimensionNumber == variant->arrayDimensionsSize - 1) {
-					for(int i = 0; i < variant->arrayDimensions[dimensionNumber]; i++) {
+					for(int i = 0; i < variant->arrayDimensions[dimensionNumber]; i++) {												
 						nlohmann::json jsonValue;
 						UA_Variant var = {
 							variant->type,  			/* The data type description */
@@ -423,7 +389,7 @@ namespace Umati {
 						j->push_back(jsonValue);
 					}
 					return;
-				}
+				}				
 				UA_UInt32 offset = 1;
 				for(UA_UInt32 i = dimensionNumber + 1; i < variant->arrayDimensionsSize - 1; i++) {
 					offset = offset * variant->arrayDimensions[i];
@@ -503,11 +469,11 @@ namespace Umati {
 				if (serializeStatusInformation) {
 					jsonValue = &m_value["value"];
 				}
-
-				UA_Variant variant;
+				
+				UA_Variant variant; 
 				UA_Variant_init(&variant);
 				variant = dataValue.value;
-
+				
 				if (UA_Variant_isEmpty(&variant)) {
 					return;
 				}
@@ -522,7 +488,7 @@ namespace Umati {
 					setValueFromScalarVariant(variant, jsonValue, serializeStatusInformation);
 				}
 			}
-
+		
 			void UaDataValueToJsonValue::setStatusCodeFromDataValue(const UA_DataValue &dataValue) {
 				auto &jsonStatusCode = m_value["statusCode"];
 

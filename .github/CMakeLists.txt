@@ -18,11 +18,16 @@ externalproject_add(
     INSTALL_DIR "${CMAKE_INSTALL_PREFIX}"
 )
 
-externalproject_add(
-    GTestExternal
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../deps/googletest
-    CMAKE_ARGS -Dgtest_force_shared_crt:BOOL=ON -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
-    INSTALL_DIR "${CMAKE_INSTALL_PREFIX}"
+ExternalProject_Add(Tinyxml2External
+	SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../deps/tinyxml2
+	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+	INSTALL_DIR "${CMAKE_INSTALL_PREFIX}"
+)
+
+ExternalProject_Add(GTestExternal
+	SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../deps/googletest
+	CMAKE_ARGS -Dgtest_force_shared_crt:BOOL=ON -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+	INSTALL_DIR "${CMAKE_INSTALL_PREFIX}"
 )
 
 find_package(Patch REQUIRED)
@@ -82,11 +87,10 @@ externalproject_add(
     DEPENDS open62541External GTestExternal
 )
 
-externalproject_add(
-    Dashboard-Client
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX} -DPAHO_WITH_SSL:BOOL=${DPAHO_WITH_SSL}
-    INSTALL_DIR "${CMAKE_INSTALL_PREFIX}"
-    DEPENDS open62541CppExternal EasyloggingppExternal JsonExternal PahoCppExternal
-    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/Dashboard-Client-build
+ExternalProject_Add(Dashboard-Client
+	SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..
+	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX} -DPAHO_WITH_SSL:BOOL=${DPAHO_WITH_SSL}
+	INSTALL_DIR "${CMAKE_INSTALL_PREFIX}"
+	DEPENDS open62541CppExternal EasyloggingppExternal JsonExternal PahoCppExternal Tinyxml2External
+	BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/Dashboard-Client-build
 )
