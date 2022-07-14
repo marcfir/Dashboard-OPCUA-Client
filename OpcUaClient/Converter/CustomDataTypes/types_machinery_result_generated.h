@@ -13,10 +13,7 @@
 
 #endif
 
-
-
 _UA_BEGIN_DECLS
-
 
 /**
  * Every type is assigned an index in an array containing the type descriptions.
@@ -30,10 +27,10 @@ extern UA_EXPORT UA_DataType UA_TYPES_MACHINERY_RESULT[UA_TYPES_MACHINERY_RESULT
  * ^^^^^^^^^^^^^^^^^^^^^^^
  * contains measured times that were generated during the execution of a recipe */
 typedef struct {
-    UA_DateTime startTime;
-    UA_DateTime endTime;
-    UA_Double *acquisitionDuration;
-    UA_Double *processingDuration;
+  UA_DateTime startTime;
+  UA_DateTime endTime;
+  UA_Double *acquisitionDuration;
+  UA_Double *processingDuration;
 } UA_ProcessingTimesDataType;
 
 #define UA_TYPES_MACHINERY_RESULT_PROCESSINGTIMESDATATYPE 0
@@ -43,7 +40,7 @@ typedef struct {
  * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
  * Contains information which file should be provided. */
 typedef struct {
-    UA_String resultId;
+  UA_String resultId;
 } UA_ResultTransferOptionsDataType;
 
 #define UA_TYPES_MACHINERY_RESULT_RESULTTRANSFEROPTIONSDATATYPE 1
@@ -53,11 +50,11 @@ typedef struct {
  * ^^^^^^^^^^^^^^^^^^^^
  * Indicates whether a result was in tolerance */
 typedef enum {
-    UA_RESULTEVALUATIONENUM_UNDEFINED = 0,
-    UA_RESULTEVALUATIONENUM_OK = 1,
-    UA_RESULTEVALUATIONENUM_NOTOK = 2,
-    UA_RESULTEVALUATIONENUM_NOTDECIDABLE = 3,
-    __UA_RESULTEVALUATIONENUM_FORCE32BIT = 0x7fffffff
+  UA_RESULTEVALUATIONENUM_UNDEFINED = 0,
+  UA_RESULTEVALUATIONENUM_OK = 1,
+  UA_RESULTEVALUATIONENUM_NOTOK = 2,
+  UA_RESULTEVALUATIONENUM_NOTDECIDABLE = 3,
+  __UA_RESULTEVALUATIONENUM_FORCE32BIT = 0x7fffffff
 } UA_ResultEvaluationEnum;
 UA_STATIC_ASSERT(sizeof(UA_ResultEvaluationEnum) == sizeof(UA_Int32), enum_must_be_32bit);
 
@@ -68,28 +65,28 @@ UA_STATIC_ASSERT(sizeof(UA_ResultEvaluationEnum) == sizeof(UA_Int32), enum_must_
  * ^^^^^^^^^^^^^^^^^^
  * Meta data of a result, describing the result. */
 typedef struct {
-    UA_String resultId;
-    UA_Boolean *hasTransferableDataOnFile;
-    UA_Boolean *isPartial;
-    UA_Boolean *isSimulated;
-    UA_Int32 *resultState;
-    UA_String *stepId;
-    UA_String *partId;
-    UA_String *externalRecipeId;
-    UA_String *internalRecipeId;
-    UA_String *productId;
-    UA_String *externalConfigurationId;
-    UA_String *internalConfigurationId;
-    UA_String *jobId;
-    UA_DateTime *creationTime;
-    UA_ProcessingTimesDataType *processingTimes;
-    size_t resultUriSize;
-    UA_String *resultUri;
-    UA_ResultEvaluationEnum *resultEvaluation;
-    UA_Int32 *resultEvaluationCode;
-    UA_LocalizedText *resultEvaluationDetails;
-    size_t fileFormatSize;
-    UA_String *fileFormat;
+  UA_String resultId;
+  UA_Boolean *hasTransferableDataOnFile;
+  UA_Boolean *isPartial;
+  UA_Boolean *isSimulated;
+  UA_Int32 *resultState;
+  UA_String *stepId;
+  UA_String *partId;
+  UA_String *externalRecipeId;
+  UA_String *internalRecipeId;
+  UA_String *productId;
+  UA_String *externalConfigurationId;
+  UA_String *internalConfigurationId;
+  UA_String *jobId;
+  UA_DateTime *creationTime;
+  UA_ProcessingTimesDataType *processingTimes;
+  size_t resultUriSize;
+  UA_String *resultUri;
+  UA_ResultEvaluationEnum *resultEvaluation;
+  UA_Int32 *resultEvaluationCode;
+  UA_LocalizedText *resultEvaluationDetails;
+  size_t fileFormatSize;
+  UA_String *fileFormat;
 } UA_ResultMetaDataType;
 
 #define UA_TYPES_MACHINERY_RESULT_RESULTMETADATATYPE 3
@@ -99,13 +96,12 @@ typedef struct {
  * ^^^^^^^^^^^^^^
  * Contains fields that were created during the execution of a recipe. */
 typedef struct {
-    UA_ResultMetaDataType resultMetaData;
-    size_t resultContentSize;
-    UA_Variant *resultContent;
+  UA_ResultMetaDataType resultMetaData;
+  size_t resultContentSize;
+  UA_Variant *resultContent;
 } UA_ResultDataType;
 
 #define UA_TYPES_MACHINERY_RESULT_RESULTDATATYPE 4
-
 
 _UA_END_DECLS
 
