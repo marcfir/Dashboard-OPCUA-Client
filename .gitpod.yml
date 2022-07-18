@@ -3,6 +3,5 @@
 # and commit this file to your remote git repository to share the goodness with others.
 
 tasks:
-  - init: bash ./initialbuild.sh
-
-
+  - init: npm install opcua-commander -g && sudo apt update && sudo apt -yy install yamllint && pip install cmakelang
+    command: bash ./initialbuild.sh
