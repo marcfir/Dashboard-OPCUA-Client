@@ -2,115 +2,43 @@
   "MachineCacheFile": "MachineCache_datahub.json",
   "MachinesFilter": [
     {
-      "Uri": "http://example.com/BasicMachineTool/",
-      "Id": "i=66382",
-      "$comment": "BasicMachineTool"
+      "Uri": "de.uni-stuttgart.isw.glas.sampleserver",
+      "Id": "i=58192",
+      "$comment": "GlassMachineType"
     }
   ],
   "ObjectTypeNamespaces": [
     "http://opcfoundation.org/UA/",
-    "http://opcfoundation.org/UA/IA/",
-    "http://opcfoundation.org/UA/IA-Prototyping/",
     "http://opcfoundation.org/UA/DI/",
     "http://opcfoundation.org/UA/Machinery/",
-    "http://opcfoundation.org/UA/Machinery/Result/",
-    "http://opcfoundation.org/UA/MachineTool/",
-    "http://opcfoundation.org/UA/MachineTool-Prototyping/",
-    "http://opcfoundation.org/UA/SurfaceTechnology/",
-    "http://opcfoundation.org/UA/SurfaceTechnology/Example",
-    "http://opcfoundation.org/UA/SurfaceTechnology/Example/ConveyorGunsAxes/",
-    "http://opcfoundation.org/UA/SurfaceTechnology/Example/MaterialSupplyRoom/",
-    "http://opcfoundation.org/UA/SurfaceTechnology/Example/DosingSystem/",
-    "http://opcfoundation.org/UA/SurfaceTechnology/Example/OvenBooth/",
-    "http://opcfoundation.org/UA/SurfaceTechnology/Example/Pretreatment",
-    "http://opcfoundation.org/GMS/"
+    "http://opcfoundation.org/UA/Glass/Flat/"
   ],
   "NamespaceInformations": [
     {
-      "Namespace": "http://opcfoundation.org/UA/MachineTool/",
+      "Namespace": "http://opcfoundation.org/UA/Glass/Flat/",
 	    "Types": [
         {
-          "Uri": "http://opcfoundation.org/UA/MachineTool/",
-          "Id": "i=13",
-          "$comment": "MachineToolType"
+          "Uri": "http://opcfoundation.org/UA/Glass/Flat/",
+          "Id": "i=1015",
+          "$comment": "GlassMachineType"
         }
       ],
       "IdentificationType": {
-        "Uri": "http://opcfoundation.org/UA/MachineTool/",
-        "Id": "i=11",
-        "$comment": "MachineToolIdentificationType"
+        "Uri": "http://opcfoundation.org/UA/Glass/Flat/",
+        "Id": "i=1020",
+        "$comment": "GlassMachineIdentificationType"
 
+      },
+      "ProductionPlanType":{
+        "Uri":"http://opcfoundation.org/UA/Glass/Flat/",
+        "Id":"i=1023",
+        "$comment":"ProductionPlanType"
       }
-    },
-    {
-      "Namespace": "http://opcfoundation.org/UA/SurfaceTechnology/",
-	    "Types": [
-        {
-          "Uri": "http://opcfoundation.org/UA/SurfaceTechnology/",
-          "Id": "i=1009",
-          "$comment": "SurfaceTechnologCoatingSystemType"
-        },
-        {
-          "Uri": "http://opcfoundation.org/UA/SurfaceTechnology/",
-          "Id": "i=1006",
-          "$comment": "SurfaceTecnologyObjectType"
-        },
-        {
-          "Uri": "http://opcfoundation.org/UA/SurfaceTechnology/",
-          "Id": "i=1010",
-          "$comment": "SurfaceTechnologyDosingSystemType"
-        },
-        {
-          "Uri": "http://opcfoundation.org/UA/SurfaceTechnology/",
-          "Id": "i=1011",
-          "$comment": "SurfaceTechnologyFilterSystemType"
-        },
-        {
-          "Uri": "http://opcfoundation.org/UA/SurfaceTechnology/",
-          "Id": "i=1005",
-          "$comment": "SurfaceTechnologyPipeType"
-        },
-           {
-          "Uri": "http://opcfoundation.org/UA/SurfaceTechnology/",
-          "Id": "i=1008",
-          "$comment": "SurfaceTechnologyPumpType"
-        },
-        {
-          "Uri": "http://opcfoundation.org/UA/SurfaceTechnology/",
-          "Id": "i=1004",
-          "$comment": "SurfaceTechnologyValveType"
-        },
-        {
-          "Uri": "http://opcfoundation.org/UA/SurfaceTechnology/",
-          "Id": "i=1003",
-          "$comment": "SurfaceTechnologyVesselType"
-        }
-      ],
-      "IdentificationType": {
-        "Uri": "http://opcfoundation.org/UA/Machinery/",
-        "Id": "i=1012",
-        "$comment": "MachineIdentificationType"
-      }
-    },
-    {
-       "Namespace":"http://opcfoundation.org/GMS/",
-       "Types":[
-         {
-           "Uri":"http://opcfoundation.org/GMS/",
-           "Id":"i=1002",
-           "$comment":"GMSType"
-         }
-       ],
-       "IdentificationType":{
-         "Uri":"http://opcfoundation.org/GMS/",
-         "Id":"i=1011",
-         "$comment":"GMSIdentificationType"
-       }
     }
   ]
   ,
   "OpcUa": {
-    "Endpoint": "opc.tcp://localhost:4840",
+    "Endpoint": "opc.tcp://NB-MDORNAUS:4840",
     "Username": "",
     "Password": "",
     "Security": 1

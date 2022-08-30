@@ -193,6 +193,8 @@ namespace Umati
 
 		UA_NodeClass OpcUaClient::readNodeClass(const open62541Cpp::UA_NodeId &nodeId)
 		{
+			LOG(INFO) << "NodeId: " <<  nodeId.NodeId->identifier.numeric;
+			LOG(INFO) << "Uri"         << nodeId.NodeId->namespaceIndex;
 			checkConnection();
 
 			UA_NodeClass returnClass;
@@ -924,6 +926,10 @@ namespace Umati
 			}
 
 			return true;
+		}
+		std::shared_ptr<UA_Client> OpcUaClient::getUaClient()
+		{
+			return m_pClient;
 		}
 
 	} // namespace OpcUa
