@@ -931,6 +931,10 @@ namespace Umati
 		{
 			return m_pClient;
 		}
+		std::recursive_mutex* OpcUaClient::getClientMutex() {
+
+			return &m_clientMutex;
+		}
 
 	} // namespace OpcUa
 } // namespace Umati

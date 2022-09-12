@@ -136,6 +136,7 @@ namespace Umati
 
         public:
 			std::shared_ptr<UA_Client> m_pClient; // Zugriff aus dem ConnectThread, dem PublisherThread
+			std::recursive_mutex* getClientMutex();
             std::recursive_mutex m_clientMutex;
 		private:
 			void on_connected();
