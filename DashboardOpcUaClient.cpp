@@ -68,7 +68,7 @@ void DashboardOpcUaClient::Iterate() {
         auto retval = UA_Client_run_iterate(m_pClient->m_pClient.get(), 100);
     }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
     auto currentTime = std::chrono::steady_clock::now();
     auto pudDiff_ms = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - m_lastPublish).count();
