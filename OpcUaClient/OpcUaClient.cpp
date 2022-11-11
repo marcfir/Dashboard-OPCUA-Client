@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright 2019-2021 (c) Christian von Arnim, ISW University of Stuttgart (for umati and VDW e.V.)
+ * Copyright 2019-2022 (c) Christian von Arnim, ISW University of Stuttgart (for umati and VDW e.V.)
  * Copyright 2020 (c) Dominik Basner, Sotec GmbH (for VDW e.V.)
  * Copyright 2021 (c) Marius Dege, basysKom GmbH
  */
@@ -38,19 +38,40 @@ namespace Umati
 		{
 			switch(channelState) {
 				case UA_SECURECHANNELSTATE_FRESH:
+					LOG(INFO) << "The client state is fresh";
+					break;
 				case UA_SECURECHANNELSTATE_CLOSED:
 					LOG(INFO) << "The client is disconnected";
-					break;
-				case UA_SECURECHANNELSTATE_HEL_SENT:
-					LOG(INFO) << "Waiting for ack";
-					break;
-				case UA_SECURECHANNELSTATE_OPN_SENT:
-					LOG(INFO) << "Waiting for OPN Response";
 					break;
 				case UA_SECURECHANNELSTATE_OPEN:
 					LOG(INFO) << "A SecureChannel to the server is open";
 					break;
+				case UA_SECURECHANNELSTATE_CONNECTING:
+					LOG(INFO) << "Client is connecting";
+					break;
+				case UA_SECURECHANNELSTATE_CONNECTED:
+					LOG(INFO) << "Client is connected";
+					break;
+				case UA_SECURECHANNELSTATE_HEL_SENT:
+					LOG(INFO) << "Client hello sent";
+					break;
+				case UA_SECURECHANNELSTATE_HEL_RECEIVED:
+					LOG(INFO) << "Client hello received";
+					break;
+				case UA_SECURECHANNELSTATE_ACK_SENT:
+					LOG(INFO) << "Client ack sent";
+					break;
+				case UA_SECURECHANNELSTATE_ACK_RECEIVED:
+					LOG(INFO) << "Client ack received";
+					break;
+				case UA_SECURECHANNELSTATE_OPN_SENT:
+					LOG(INFO) << "Client open sent";
+					break;
+				case UA_SECURECHANNELSTATE_CLOSING:
+					LOG(INFO) << "Client closing";
+					break;
 				default:
+					LOG(INFO) << "Unknown securechannel state: " << channelState;
 					break;
 				}
 
@@ -61,7 +82,20 @@ namespace Umati
 				case UA_SESSIONSTATE_CLOSED:
 					LOG(INFO) << "Session disconnected";
 					break;
+				case UA_SESSIONSTATE_CREATE_REQUESTED:
+					LOG(INFO) << "Session create requested";
+					break;
+				case UA_SESSIONSTATE_CREATED:
+					LOG(INFO) << "Session created";
+					break;
+				case UA_SESSIONSTATE_ACTIVATE_REQUESTED:
+					LOG(INFO) << "Session activate requested";
+					break;
+				case UA_SESSIONSTATE_CLOSING:
+					LOG(INFO) << "Session closing";
+					break;
 				default:
+					LOG(INFO) << "Unknown session state: " << sessionState;
 					break;
 				}
 
@@ -86,21 +120,19 @@ namespace Umati
 								 std::shared_ptr<Umati::OpcUa::OpcUaInterface> opcUaWrapper, bool bypassCertVerification)
 			: m_issueReset(issueReset),
 			m_serverUri(std::move(serverURI)), m_username(std::move(Username)), m_password(std::move(Password)),
-			m_security(static_cast<UA_MessageSecurityMode>(security)),
 			m_subscr(m_uriToIndexCache, m_indexToUriCache),
 			m_pClient(UA_Client_new(), UA_Client_delete),
 			m_dataTypeArray(getMachineryResultTypes())
-        {
+		{
 			{
 				std::lock_guard<std::recursive_mutex> l(m_clientMutex);
 				UA_ClientConfig *config = UA_Client_getConfig(m_pClient.get());
 				if (bypassCertVerification) {
 					config->certificateVerification.verifyCertificate = &bypassVerify;
 				}
+				prepareSessionConnectInfo(config->clientDescription);
 				SetupSecurity::setupSecurity(config, m_pClient.get());
 				config->securityMode = UA_MessageSecurityMode(security);
-				UA_ApplicationDescription_clear(&config->clientDescription);
-				prepareSessionConnectInfo(config->clientDescription);
 				config->timeout = 2000;
 				config->inactivityCallback = inactivityCallback;
 				config->stateCallback = stateCallback;
@@ -145,6 +177,7 @@ namespace Umati
 		UA_ApplicationDescription &
 		OpcUaClient::prepareSessionConnectInfo(UA_ApplicationDescription &sessionConnectInfo)
 		{
+			UA_ApplicationDescription_clear(&sessionConnectInfo);
 			sessionConnectInfo.applicationName = UA_LOCALIZEDTEXT_ALLOC("en-US", "KonI4.0 OPC UA Data Client");
 			sessionConnectInfo.applicationUri = UA_STRING_ALLOC("http://dashboard.umati.app/OPCUA_DataClient");
 		 	sessionConnectInfo.productUri = UA_STRING_ALLOC("KonI40OpcUaClient_Product");

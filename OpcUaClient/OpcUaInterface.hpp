@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  * 
  * Copyright 2020 (c) Dominik Basner, Sotec GmbH (for VDW e.V.)
- * Copyright 2020-2021 (c) Christian von Arnim, ISW University of Stuttgart (for umati and VDW e.V.)
+ * Copyright 2020-2022 (c) Christian von Arnim, ISW University of Stuttgart (for umati and VDW e.V.)
  * Copyright 2021 (c) Marius Dege, basysKom GmbH
  */
 
@@ -89,7 +89,7 @@ namespace Umati {
 										   size_t *endpointDescriptionsSize,
 										   UA_EndpointDescription **endpointDescriptions) override {		
 				return UA_Client_getEndpoints(client, static_cast<std::string>(*sDiscoveryURL).c_str() , endpointDescriptionsSize, endpointDescriptions);
-			};
+			}
 
 			UA_StatusCode DiscoveryFindServers(UA_Client *client, const open62541Cpp::UA_String &sDiscoveryURL,
 											size_t *registerdServerSize,
@@ -97,7 +97,7 @@ namespace Umati {
 				 
 				return UA_Client_findServers(client,(char *)sDiscoveryURL.String->data,sDiscoveryURL.String->length, nullptr, 0, nullptr, registerdServerSize,
 											 applicationDescriptions);
-			};
+			}
 
 			UA_StatusCode SessionConnect(
 									UA_Client *client,
@@ -205,7 +205,7 @@ namespace Umati {
 							referenceDescriptions.push_back(browseResponse.results[i].references[j]);
 						}
 					}
-   					UA_BrowseRequest_clear(&browseRequest);
+					UA_BrowseRequest_clear(&browseRequest);
 
 					return browseResponse;
 			}

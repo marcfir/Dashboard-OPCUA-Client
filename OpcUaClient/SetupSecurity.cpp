@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  * 
- * Copyright 2019-2021 (c) Christian von Arnim, ISW University of Stuttgart (for umati and VDW e.V.)
+ * Copyright 2019-2022 (c) Christian von Arnim, ISW University of Stuttgart (for umati and VDW e.V.)
  * Copyright 2020 (c) Dominik Basner, Sotec GmbH (for VDW e.V.)
  * Copyright 2021 (c) Marius Dege, basysKom GmbH
  */
@@ -13,6 +13,7 @@
 #include <open62541/architecture_definitions.h>
 #include <open62541/plugin/create_certificate.h>
 #include <open62541/plugin/log_stdout.h>
+#include <Open62541Cpp/UA_String.hpp>
 #include <stdlib.h>
 #include <string>
 #include <fstream>
@@ -160,7 +161,7 @@ namespace Umati {
 			UA_ByteString privateKey = loadFile(paths.ClientPrivCert.c_str());
 			if(certificate.length == 0 || privateKey.length == 0)
 			{
-				createNewClientCert();
+				createNewClientCert(config);
 				certificate = loadFile(paths.ClientPubCert.c_str());
 				privateKey = loadFile(paths.ClientPrivCert.c_str());
 				if(certificate.length == 0 || privateKey.length == 0)
@@ -186,16 +187,21 @@ namespace Umati {
 			return true;
 		}
 
-		void SetupSecurity::createNewClientCert() {
+		void SetupSecurity::createNewClientCert(UA_ClientConfig *config) {
 			LOG(INFO) << "Creating new client certificate";
 			UA_String subject[3] = {UA_STRING_STATIC("C=DE"),
 							UA_STRING_STATIC("O=SampleOrganization"),
 							UA_STRING_STATIC("CN=UmatiDashboardClient@localhost")};
 
 			UA_UInt32 lenSubject = 3;
+			std::stringstream ssSubAltNameUri;
+			open62541Cpp::UA_String uri(&config->clientDescription.applicationUri, false);
+			ssSubAltNameUri << "URI:" << static_cast<std::string>(uri);
+			
+			open62541Cpp::UA_String altNameUri(ssSubAltNameUri.str());
 			UA_String subjectAltName[2]= {
 				UA_STRING_STATIC("DNS:localhost"),
-				UA_STRING_STATIC("URI:urn:open62541.client.application")
+				*altNameUri.String
 			};
 			UA_UInt32 lenSubjectAltName = 2;
 			UA_ByteString certificate = UA_BYTESTRING_NULL;
