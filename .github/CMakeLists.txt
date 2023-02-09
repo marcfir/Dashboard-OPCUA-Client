@@ -108,7 +108,6 @@ externalproject_add(
 )
 
 
-# message()
 if(${BUILD_DEB_PACKAGE})
     unset(BINARY_DIR)
     ExternalProject_Get_property(Dashboard-Client BINARY_DIR) 
