@@ -4,42 +4,43 @@ name: Build
 on: [push, pull_request]
 
 jobs:
-  # build-linux:
-  #   strategy:
-  #     matrix:
-  #       os: [ubuntu-20.04, ubuntu-22.04]
-  #       build_type: [Debug, Release]
-  #       arch: ["386", "amd64"]
-  #   runs-on: ${{matrix.os}}
-  #   env:
-  #     CMAKE_INSTALL_PREFIX: ${{ github.workspace }}/install
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v3.3.0
-  #       with:
-  #         path: UmatiDashboardOpcUaClient
-  #         submodules: recursive
-  #     - name: Build UmatiDashboardOpcUaClient with dependencies
-  #       run: |
-  #         LIBCPP_VERSION=$(dpkg -s libstdc++6 | grep Version | awk '{match($0,"[0-9]+.[0-9].[0-9]",a)}END{print a[0]}')
-  #         mkdir -p build
-  #         cd build
-  #         cmake ../UmatiDashboardOpcUaClient/.github/ -DCMAKE_INSTALL_PREFIX:PATH=${{ env.CMAKE_INSTALL_PREFIX }} \
-  #           -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DPAHO_WITH_SSL=1 -DBUILD_DEB_PACKAGE:BOOL=1 -DDEB_PACKAGE_LIBCPP_VERSION=$LIBCPP_VERSION
-  #         cmake --build . -j
-  #     - name: Upload Artefacts
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: UmatiDashboardOpcUaClient-${{matrix.build_type}}-${{matrix.os}}-${{matrix.arch}}
-  #         path: |
-  #           ${{ env.CMAKE_INSTALL_PREFIX }}/bin
-  #           ${{ env.CMAKE_INSTALL_PREFIX }}/share/DashboardOpcUaClient
-  #     - name: Upload Debian package
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: dashboardopcuaclient.deb-${{matrix.build_type}}-${{matrix.os}}-${{matrix.arch}}
-  #         path: |
-  #           ${{ env.CMAKE_INSTALL_PREFIX }}/*.deb
+  build-linux:
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, ubuntu-22.04]
+        build_type: [Debug, Release]
+        arch: ["386", "amd64"]
+    runs-on: ${{matrix.os}}
+    env:
+      CMAKE_INSTALL_PREFIX: ${{ github.workspace }}/install
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3.3.0
+        with:
+          path: UmatiDashboardOpcUaClient
+          submodules: recursive
+      - name: Build UmatiDashboardOpcUaClient with dependencies
+        run: |
+          LIBCPP_VERSION=$(dpkg -s libstdc++6 | grep Version | awk '{match($0,"[0-9]+.[0-9].[0-9]",a)}END{print a[0]}')
+          mkdir -p build
+          cd build
+          cmake ../UmatiDashboardOpcUaClient/.github/ -DCMAKE_INSTALL_PREFIX:PATH=${{ env.CMAKE_INSTALL_PREFIX }} \
+            -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DPAHO_WITH_SSL=1 -DBUILD_DEB_PACKAGE:BOOL=1 -DDEB_PACKAGE_LIBCPP_VERSION=$LIBCPP_VERSION
+          cmake --build . -j
+          make package
+      - name: Upload Artefacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: UmatiDashboardOpcUaClient-${{matrix.build_type}}-${{matrix.os}}-${{matrix.arch}}
+          path: |
+            ${{ env.CMAKE_INSTALL_PREFIX }}/bin
+            ${{ env.CMAKE_INSTALL_PREFIX }}/share/DashboardOpcUaClient
+      - name: Upload Debian package
+        uses: actions/upload-artifact@v3
+        with:
+          name: dashboardopcuaclient-${{matrix.build_type}}-${{matrix.os}}-${{matrix.arch}}.deb
+          path: |
+            ${{ env.CMAKE_INSTALL_PREFIX }}/*.deb
   build-windows:
     strategy:
       matrix:
@@ -61,40 +62,47 @@ jobs:
           cd build
           cmake ../UmatiDashboardOpcUaClient/.github/ -DCMAKE_INSTALL_PREFIX:PATH=${{ env.CMAKE_INSTALL_PREFIX }} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DPAHO_WITH_SSL=1
           cmake --build . -j
-  # docker:
-  #   runs-on: ubuntu-20.04
-  #   env:
-  #     # Check if this is not a pull request and GITHUB_TOKEN is set
-  #     # As all env variables are strings, you need to compaire against "== 'true'" (not "== true")
-  #     IS_NOT_PR: ${{ !github.head_ref && true }}
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v3.3.0
-  #       with:
-  #         path: UmatiDashboardOpcUaClient
-  #         submodules: recursive
-  #     - name: Set up QEMU
-  #       uses: docker/setup-qemu-action@v2
-  #     - name: Set up Docker Buildx
-  #       uses: docker/setup-buildx-action@v2.4.1
-  #     - name: PrepareReg Names
-  #       run: |
-  #         #shellcheck  disable=SC2154
-  #         echo IMAGE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
-  #         echo IMAGE_TAG=$(echo ${{ github.ref }} | tr '[:upper:]' '[:lower:]' |  awk '{sub(/([^\/]*\/){2}/,""); gsub(/\/|_/, "-")}1') >> $GITHUB_ENV
-  #     - name: Login to GitHub Container Registry
-  #       uses: docker/login-action@v2.1.0
-  #       if: env.IS_NOT_PR == 'true' && ${{ github.actor }} != 'dependabot'
-  #       with:
-  #         registry: ghcr.io
-  #         username: ${{ github.repository_owner }}
-  #         password: ${{ secrets.GITHUB_TOKEN }}
-  #     - name: Build Docker Release
-  #       uses: docker/build-push-action@v4.0.0
-  #       with:
-  #         file: "./UmatiDashboardOpcUaClient/Dockerfile"
-  #         context: ./UmatiDashboardOpcUaClient
-  #         platforms: linux/amd64
-  #         push: ${{env.IS_NOT_PR == 'true'}}
-  #         tags: |
-  #           ghcr.io/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_TAG }}
+      - name: Upload Artefacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: UmatiDashboardOpcUaClient-${{matrix.build_type}}-${{matrix.os}}-${{matrix.arch}}
+          path: |
+            ${{ env.CMAKE_INSTALL_PREFIX }}/bin
+            ${{ env.CMAKE_INSTALL_PREFIX }}/share/DashboardOpcUaClient
+  docker:
+    runs-on: ubuntu-20.04
+    env:
+      # Check if this is not a pull request and GITHUB_TOKEN is set
+      # As all env variables are strings, you need to compaire against "== 'true'" (not "== true")
+      IS_NOT_PR: ${{ !github.head_ref && true }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3.3.0
+        with:
+          path: UmatiDashboardOpcUaClient
+          submodules: recursive
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2.4.1
+      - name: PrepareReg Names
+        run: |
+          #shellcheck  disable=SC2154
+          echo IMAGE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+          echo IMAGE_TAG=$(echo ${{ github.ref }} | tr '[:upper:]' '[:lower:]' |  awk '{sub(/([^\/]*\/){2}/,""); gsub(/\/|_/, "-")}1') >> $GITHUB_ENV
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2.1.0
+        if: env.IS_NOT_PR == 'true' && ${{ github.actor }} != 'dependabot'
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Docker Release
+        uses: docker/build-push-action@v4.0.0
+        with:
+          file: "./UmatiDashboardOpcUaClient/Dockerfile"
+          context: ./UmatiDashboardOpcUaClient
+          platforms: linux/amd64
+          push: ${{env.IS_NOT_PR == 'true'}}
+          tags: |
+            ghcr.io/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_TAG }}
